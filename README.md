@@ -13,7 +13,8 @@ I.E.
 Entity, Canvas, Scene, SceneManager and etc. 
 
 
-TODO:
+# TODO:
+
 Update the content manager to be more async operated and more request oriented. 
     - Scene loads should manage if a resource is in use all ready before deloading and loading again
     - make scene changing a coroutine that returns the % of loaded objects. 
