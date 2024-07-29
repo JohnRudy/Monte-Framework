@@ -23,6 +23,8 @@ Move from synchronous do-as-it-is-deemed to async do-when-able kind of loop.
 
 Create own bindings for updated SDL2 (or sdl3 dev?)
 
+Add actual physics for side scrollers. 
+
 Create documentation
 
 Build with flag 'debug' or 'release' flag for debug systems to be enabled or not. 
