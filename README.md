@@ -1,31 +1,38 @@
 # MonteEngine
 
-A poormans synchronous 2D game engine for simple game products and jam games.
+V 0.0.1
 
-Crossplatform (Windows and Linux) game engine built using SDL2 as the backbone for rendering. 
-Uses Sayers.SDL2.Core nuget package for now. 
+MonteEngine is a simplistic 2D engine with some Unity like collection handling. MonteEngine does provide some builtin solutions for most common 2D usecases. 
 
-X+ right, Y+ down. 
+Monte Engine uses SDL2 as its backbone to access windows, renderers, controllers, audio systems, etc, through MonteSDL2Binds. 
 
-Provides collections based systems and components for basic game entities and systems. 
+MonteSDL2Binds.dll is required to build with MonteEngine in your projects. 
 
-I.E. 
-Entity, Canvas, Scene, SceneManager and etc. 
+Files to have in the projects root and in the end built release products .exe root.
 
+```
+MonteSDL2Binds.dll
+MonteEngine.dll
+SDL2.dll
+SDL2_image.dll
+SDL2_ttf.dll
+SDL2_mixer.dll
+```
 
-# TODO:
+you can getthe SDL2 dll files from here. 
+https://github.com/mmozeiko/build-sdl2 
 
-Update the content manager to be more async operated and more request oriented. 
-    - Scene loads should manage if a resource is in use all ready before deloading and loading again
-    - make scene changing a coroutine that returns the % of loaded objects. 
+Add this to your .csproj
 
-Move from synchronous do-as-it-is-deemed to async do-when-able kind of loop. 
+```xml
+<ItemGroup>
+  <Reference Include="MonteEngine.dll" />
+  <Reference Include="MonteSDL2Binds.dll" />
+  <Reference Include="SDL2.dll" />
+  <Reference Include="SDL2_image.dll" />
+  <Reference Include="SDL2_ttf.dll" />
+  <Reference Include="SDL2_mixer.dll" />
+</ItemGroup>
+```
 
-Create own bindings for updated SDL2 (or sdl3 dev?)
-
-Add actual physics for side scrollers. 
-
-Create documentation
-
-Build with flag 'debug' or 'release' flag for debug systems to be enabled or not. 
-Add generated .dll to the project. 
+Check the Documentation folder for more information and the Getting Started section for a quick launch project.
