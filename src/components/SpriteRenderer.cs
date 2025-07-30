@@ -2,18 +2,26 @@ using Monte.Core;
 using Monte.Abstractions;
 using Monte.Interfaces;
 
+using System.Runtime.InteropServices;
+
+using static SDL.SDL;
 using static SDL.SDL_rect;
 using static SDL.SDL_render;
-using static SDL.SDL;
+using static SDL.SDL_pixels;
+using static SDL.SDL_surface;
 
 
-namespace Monte
+namespace Monte.Components
 {
     /// <summary>
     /// Main texture render component. Used by Animator to animate spritesheets
     /// </summary>
     public class SpriteRenderer : RenderObject, IComponent
     {
+        private IntPtr modifiedTexture = IntPtr.Zero;
+        private List<string> currentPalette = [];
+        private string modifiedFile = "";
+
         private MonteBehaviour? parent;
         public MonteBehaviour? Parent
         {
@@ -63,6 +71,12 @@ namespace Monte
             Renderer.RenderObjects.Add(this);
         }
 
+        public void ChangeFile(string file)
+        {
+            File = file;
+            Texture = ContentManager.LoadImage(file);
+        }
+
         public override void Render()
         {
             if (Parent == null) return;
@@ -78,13 +92,13 @@ namespace Monte
 
             SDL_FPoint RotOrigin = new() { x = Width * Origin.X, y = Height * Origin.Y };
 
-            if (SDL_SetTextureAlphaMod(Texture, Color.a) != 0)
+            if (SDL_SetTextureAlphaMod(modifiedTexture != IntPtr.Zero ? modifiedTexture : Texture, Color.a) != 0)
                 Debug.Log(SDL_GetError());
 
-            if (SDL_SetTextureColorMod(Texture, Color.r, Color.g, Color.b) != 0)
+            if (SDL_SetTextureColorMod(modifiedTexture != IntPtr.Zero ? modifiedTexture : Texture, Color.r, Color.g, Color.b) != 0)
                 Debug.Log(SDL_GetError());
 
-            if (SDL_RenderCopyExF(MonteEngine.SDL_Renderer, Texture, ref Source, ref Destination, Transform.Rotation, ref RotOrigin, RenderFlip) != 0)
+            if (SDL_RenderCopyExF(MonteEngine.SDL_Renderer, modifiedTexture != IntPtr.Zero ? modifiedTexture : Texture, ref Source, ref Destination, Transform.Rotation, ref RotOrigin, RenderFlip) != 0)
                 Debug.Log($"There was an issue drawing texture. {SDL_GetError()}");
 
             // Debug
@@ -94,6 +108,9 @@ namespace Monte
 
         public void Destroy()
         {
+            if (modifiedTexture != IntPtr.Zero)
+                SDL_DestroyTexture(modifiedTexture);
+
             Renderer.RenderObjects.Remove(this);
         }
 

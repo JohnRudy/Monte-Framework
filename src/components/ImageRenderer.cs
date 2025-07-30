@@ -7,7 +7,7 @@ using static SDL.SDL_render;
 using static SDL.SDL;
 
 
-namespace Monte
+namespace Monte.Components
 {
     /// <summary>
     /// Main texture render component. Used by Animator to animate spritesheets

@@ -10,7 +10,7 @@ using static SDL.SDL_ttf;
 using static SDL.SDL;
 
 
-namespace Monte.Rendering
+namespace Monte.Components
 {
     /// <summary>
     /// Main text renderer. 

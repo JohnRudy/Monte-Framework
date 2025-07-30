@@ -90,7 +90,7 @@ namespace Monte.Core
                     else
                     {
                         SetupGameController(controller, i);
-                        Console.WriteLine("MonteEngine: Gamecontroller opened!");
+                        Debug.Log("MonteEngine: Gamecontroller opened!");
                     }
                 }
             }
@@ -227,7 +227,7 @@ namespace Monte.Core
             _controllers.TryGetValue(e.cdevice.which, out ControllerInfo? ci);
             if (ci == null)
             {
-                Console.WriteLine("controller info not found");
+                Debug.Log("controller info not found");
                 return;
             }
 
@@ -244,7 +244,7 @@ namespace Monte.Core
             _controllers.TryGetValue(e.cdevice.which, out ControllerInfo? ci);
             if (ci == null)
             {
-                Console.WriteLine("controller info not found");
+                Debug.Log("controller info not found");
                 return;
             }
 

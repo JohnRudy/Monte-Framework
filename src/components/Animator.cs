@@ -2,6 +2,7 @@ using Monte.Abstractions;
 using Monte.Interfaces;
 using Monte.Core;
 using static SDL.SDL_rect;
+using System.Linq.Expressions;
 
 namespace Monte.Components
 {
@@ -10,7 +11,7 @@ namespace Monte.Components
     /// You shouldnt ever need to create animation clips yourself or edit them. 
     /// Animator component will deal with everything for you. 
     /// </summary>
-    public struct AnimationClip
+    public class AnimationClip
     {
         /// <summary>
         /// Name of the animation clip
@@ -25,7 +26,7 @@ namespace Monte.Components
         /// <summary>
         /// The length of the animation in frames.
         /// </summary>
-        public readonly int FrameCount => Frames.Length;
+        public int FrameCount => Frames.Length;
 
         /// <summary>
         /// Which spritefile is assosiated with this animation.
@@ -36,6 +37,11 @@ namespace Monte.Components
         /// Is this animation clip looping. 
         /// </summary>
         public bool Loop = true;
+
+        ///<summary>
+        /// Sets the speed of the clip
+        /// </summary>
+        public int FPS = 12;
 
         public AnimationClip(string name, SDL_Rect[] frames, string spriteFile)
         {
@@ -54,7 +60,7 @@ namespace Monte.Components
         /// Current collection of animation clips made.
         /// </summary>
         public AnimationClip[] AnimationClips = Array.Empty<AnimationClip>();
-        
+
         /// <summary>
         /// Current playing animaiton
         /// </summary>
@@ -63,7 +69,7 @@ namespace Monte.Components
         /// <summary>
         /// NOT IMPLEMENTED FROM ICOMPONENT
         /// </summary>
-        public string? File {get => null; set => throw new NotImplementedException(); }
+        public string? File { get => null; set => throw new NotImplementedException(); }
         MonteBehaviour? _parent;
         public MonteBehaviour? Parent { get => _parent; set => _parent = value; }
 
@@ -75,7 +81,7 @@ namespace Monte.Components
         /// <summary>
         /// Current animation frame index of animation clip.
         /// </summary>
-        public int CurrentFrameIndex {get; private set;}
+        public int CurrentFrameIndex { get; private set; }
 
         /// <summary>
         /// Get the current animation frame SDL_Rect
@@ -146,35 +152,47 @@ namespace Monte.Components
             SpriteRenderer = spriteRenderer;
         }
 
-        public void Update()
+        private void SetCurrentFrame()
         {
-#pragma warning disable CS8629
-            if (!Enabled || SpriteRenderer is null) return;
-
-            if (CurrentAnimationClip != null && SpriteRenderer != null)
+            if (CurrentAnimationClip == null || SpriteRenderer == null) return;
+            else
             {
-                animationTime += Time.DeltaTime;
-                if (SpriteRenderer.File != CurrentAnimationClip?.SpriteFile)
-                {
-                    SpriteRenderer.File = CurrentAnimationClip?.SpriteFile;
-                    SpriteRenderer.Initialize();
-                }
-
-                int nextFrame = (int)(animationTime / _speed);
-
-                if (CurrentFrameIndex == nextFrame) return;
-
-                if (!CurrentAnimationClip.Value.Loop && nextFrame == CurrentAnimationClip.Value.FrameCount) return;
-
-                CurrentFrameIndex = nextFrame % (int)CurrentAnimationClip?.FrameCount;
-                SDL_Rect af = (SDL_Rect)CurrentAnimationClip?.Frames[CurrentFrameIndex];
-
+                SDL_Rect af = CurrentAnimationClip.Frames[CurrentFrameIndex];
                 SpriteRenderer.X = af.x;
                 SpriteRenderer.Y = af.y;
                 SpriteRenderer.Width = af.w;
                 SpriteRenderer.Height = af.h;
-#pragma warning restore
             }
+        }
+
+        public void Update()
+        {
+            if (!Enabled || SpriteRenderer is null) return;
+
+#pragma warning disable CS8629
+            try
+            {
+                if (CurrentAnimationClip.FPS != _fps)
+                    FPS = CurrentAnimationClip.FPS;
+
+                if (CurrentAnimationClip != null && SpriteRenderer != null)
+                {
+                    animationTime += Time.DeltaTime;
+                    if (SpriteRenderer.File != CurrentAnimationClip?.SpriteFile)
+                        SpriteRenderer.ChangeFile(CurrentAnimationClip?.SpriteFile);
+
+                    int nextFrame = (int)(animationTime / _speed);
+
+                    if (CurrentFrameIndex == nextFrame) return;
+
+                    if (CurrentAnimationClip.Loop == false && CurrentFrameIndex == CurrentAnimationClip.FrameCount - 1) return;
+                    CurrentFrameIndex = nextFrame % (int)CurrentAnimationClip?.FrameCount;
+
+                    SetCurrentFrame();
+                }
+            }
+            catch { }
+#pragma warning restore
         }
 
 
@@ -221,6 +239,8 @@ namespace Monte.Components
                 CurrentAnimationClip = clip;
                 CurrentFrameIndex = 0;
                 animationTime = 0;
+
+                SetCurrentFrame();
                 return true;
             }
             return false;

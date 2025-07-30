@@ -86,8 +86,8 @@ namespace Monte.Abstractions
             get => new(
                 LocalTransform.Position.X + Transform.Position.X - (Origin.X * Width),
                 LocalTransform.Position.Y + Transform.Position.Y - (Origin.Y * Height),
-                LocalTransform.Scale + Width + Transform.Scale,
-                LocalTransform.Scale + Height + Transform.Scale
+                LocalTransform.Scale + Width * Transform.Scale,
+                LocalTransform.Scale + Height * Transform.Scale
             );
         }
 

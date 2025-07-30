@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Monte.Settings;
 using static SDL.SDL_video;
 
 namespace Monte.Core
@@ -44,6 +45,11 @@ namespace Monte.Core
                         IsFocused = true;
 
                     break;
+            }
+
+            if (WindowSettings.AlwaysKeepFocus && !IsFocused)
+            {
+                SDL_RaiseWindow(MonteEngine.SDL_Window);
             }
         }
     }

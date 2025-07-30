@@ -45,6 +45,11 @@ namespace Monte.Settings
     public static class WindowSettings
     {
         /// <summary>
+        /// Keep the window focused at all time.
+        /// </summary>
+        public static bool AlwaysKeepFocus = false;
+        
+        /// <summary>
         /// Initial windowWidth
         /// </summary>
         public static int WindowWidth = 640;

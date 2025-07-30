@@ -228,11 +228,11 @@ namespace Monte.Core
                     {
                         IntPtr controller = SDL_GameControllerOpen(deviceIndex);
                         if (controller == IntPtr.Zero)
-                            Console.WriteLine("MonteEngine: Could not open gamecontroller: " + SDL_GetError());
+                            Debug.Log("MonteEngine: Could not open gamecontroller: " + SDL_GetError());
                         else
                         {
                             Input.SetupGameController(controller, deviceIndex);
-                            Console.WriteLine("MonteEngine: Gamecontroller opened!");
+                            Debug.Log("MonteEngine: Gamecontroller opened!");
                         }
                     }
                 }
@@ -289,6 +289,13 @@ namespace Monte.Core
             }
 
             Cleanup();
+        }
+
+        public static void Quit()
+        {
+            SDL_Event quitEvent = new SDL_Event();
+            quitEvent.type = SDL_EventType.SDL_QUIT;
+            SDL_PushEvent(ref quitEvent);
         }
 
         private void Cleanup()

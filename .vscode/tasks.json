@@ -1,0 +1,78 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build MSDL2B",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "--configuration",
+                "Release",
+                "${workspaceFolder}/../MonteSDL2Binds/MonteSDL2Binds.sln"
+            ],
+            "isBackground": true,
+            "problemMatcher": "$msCompile",
+            "detail": "Build MSDL2B"
+        },
+        {
+            "label": "CP MSDL2 To ME",
+            "type": "shell",
+            "command": "cp",
+            "args": [
+                "${workspaceFolder}/../MonteSDL2Binds/obj/Release/net8.0/MonteSDL2Binds.dll",
+                "${workspaceFolder}/../MonteEngine/MonteSDL2Binds.dll"
+            ],
+            "dependsOn": "Build MSDL2B",
+            "isBackground": true,
+            "problemMatcher": [],
+            "detail": "Copy MSDL2B to ME"
+        },
+        {
+            "label": "Build ME",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "--configuration",
+                "Release",
+                "${workspaceFolder}/../MonteEngine/MonteEngine.sln"
+            ],
+            "dependsOn": "CP MSDL2 To ME",
+            "isBackground": true,
+            "problemMatcher": "$msCompile",
+            "detail": "Build ME"
+        },
+        {
+            "label": "CP ME To MG",
+            "type": "shell",
+            "command": "cp",
+            "args": [
+                "${workspaceFolder}/../MonteEngine/obj/Release/net8.0/MonteEngine.dll",
+                "${workspaceFolder}/../MonteGame/MonteEngine.dll"
+            ],
+            "dependsOn": "Build ME",
+            "isBackground": true,
+            "problemMatcher": [],
+            "detail": "Copy ME to MG"
+        },
+        {
+            "label": "FULL BUILD AND CP",
+            "type": "shell",
+            "command": "cp",
+            "args": [
+                "${workspaceFolder}/../MonteSDL2Binds/obj/Release/net8.0/MonteSDL2Binds.dll",
+                "${workspaceFolder}/../MonteGame/MonteSDL2Binds.dll"
+            ],
+            "dependsOn": [
+                "CP ME To MG"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "detail": "Copy all builds to final location"
+        }
+    ]
+}

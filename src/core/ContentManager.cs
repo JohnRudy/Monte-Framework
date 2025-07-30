@@ -1,5 +1,3 @@
-using static SDL.SDL_pixels;
-using static SDL.SDL_rect;
 using static SDL.SDL_mixer;
 using static SDL.SDL_surface;
 using static SDL.SDL_render;
@@ -20,7 +18,9 @@ namespace Monte.Core
 {
     public static class ContentManager
     {
+        private static Dictionary<string, IntPtr> _customTextures = [];
         private static Dictionary<string, IntPtr> _images = [];
+        private static Dictionary<string, IntPtr> _surfaceByFile = new();
         private static Dictionary<string, IntPtr> _fonts = [];
         private static Dictionary<string, IntPtr> _audio = [];
 
@@ -47,6 +47,18 @@ namespace Monte.Core
             }
             return false;
         }
+        internal static IntPtr GetCustomTexture(string name)
+        {
+            if (!_customTextures.ContainsKey(name))
+            {
+                return IntPtr.Zero;
+            }
+            return _customTextures[name];
+        }
+        internal static void SetCustomTexture(string name, IntPtr customTex)
+        {
+            _customTextures.TryAdd(name, customTex);
+        }
 
         internal static Stream GetResourceStream(string resource, string resourceFolder = "Resources", string assemblyName = "MonteEngine")
         {                                                           // Monte Engine library       // Game assembly
@@ -62,7 +74,7 @@ namespace Monte.Core
                 return resourceStream;
             throw new InvalidOperationException("Resource could not be found");
         }
-
+        
         private static IntPtr StreamToPointer(Stream stream)
         {
             byte[] imageData = new byte[stream.Length];
@@ -139,52 +151,52 @@ namespace Monte.Core
             return tempFile;
         }
 
-        /// <summary>
-        /// Returns an IntPtr to a single color texture of width and height
-        /// </summary>
-        /// <param name="width">width of the texture</param>
-        /// <param name="height">height of the texture</param>
-        /// <param name="color">SDL_Color of the texture</param>
-        /// <returns>IntPtr Texture</returns>
-        /// <exception cref="Exception"></exception>
-        public static IntPtr LoadColoredTexture(int width, int height, SDL_Color color)
-        {
-            string texName = $"TEX_{color.r}{color.g}{color.b}{width}{height}";
+        // /// <summary>
+        // /// Returns an IntPtr to a single color texture of width and height
+        // /// </summary>
+        // /// <param name="width">width of the texture</param>
+        // /// <param name="height">height of the texture</param>
+        // /// <param name="color">SDL_Color of the texture</param>
+        // /// <returns>IntPtr Texture</returns>
+        // /// <exception cref="Exception"></exception>
+        // public static IntPtr LoadColoredTexture(int width, int height, SDL_Color color)
+        // {
+        //     string texName = $"TEX_{color.r}{color.g}{color.b}{width}{height}";
 
-            Debug.Log($"ContentManager: loading  custom colored texture {texName}");
+        //     Debug.Log($"ContentManager: loading  custom colored texture {texName}");
 
-            if (_images.ContainsKey(texName)) return _images[texName];
+        //     if (_images.ContainsKey(texName)) return _images[texName];
 
-            uint Rmask = (uint)(color.r << 16);
-            uint Gmask = (uint)(color.g << 8);
-            uint Bmask = (uint)(color.b);
-            uint Amask = (uint)(color.a << 24);
+        //     uint Rmask = (uint)(color.r << 16);
+        //     uint Gmask = (uint)(color.g << 8);
+        //     uint Bmask = (uint)(color.b);
+        //     uint Amask = (uint)(color.a << 24);
 
-            IntPtr surf = SDL_CreateRGBSurface(0, width, height, 32, Rmask, Gmask, Bmask, Amask);
+        //     IntPtr surf = SDL_CreateRGBSurface(0, width, height, 32, Rmask, Gmask, Bmask, Amask);
 
-            Debug.Log($"ContentManager: Created RGB Surface");
+        //     Debug.Log($"ContentManager: Created RGB Surface");
 
-            SDL_Rect rect = new() { x = 0, y = 0, w = width, h = height };
+        //     SDL_Rect rect = new() { x = 0, y = 0, w = width, h = height };
 
-            uint white = unchecked((uint)((255 << 24) | (255 << 16) | (255 << 8) | 255));
-            if (SDL_FillRect(surf, ref rect, white) != 0) throw new Exception($"could not fill rect: {SDL_GetError()}");
+        //     uint white = unchecked((uint)((255 << 24) | (255 << 16) | (255 << 8) | 255));
+        //     if (SDL_FillRect(surf, ref rect, white) != 0) throw new Exception($"could not fill rect: {SDL_GetError()}");
 
-            Debug.Log($"ContentManager: filled rect");
+        //     Debug.Log($"ContentManager: filled rect");
 
-            IntPtr tex = SDL_CreateTextureFromSurface(MonteEngine.SDL_Renderer, surf);
+        //     IntPtr tex = SDL_CreateTextureFromSurface(MonteEngine.SDL_Renderer, surf);
 
-            Debug.Log($"ContentManager: Created Texture from surface");
+        //     Debug.Log($"ContentManager: Created Texture from surface");
 
-            SDL_FreeSurface(surf);
+        //     SDL_FreeSurface(surf);
 
-            if (SDL_SetTextureBlendMode(tex, RendererSettings.BlendMode) != 0)
-                Debug.Log(SDL_GetError());
+        //     if (SDL_SetTextureBlendMode(tex, RendererSettings.BlendMode) != 0)
+        //         Debug.Log(SDL_GetError());
 
-            Debug.Log($"ContentManager: Set Texture blend mode");
+        //     Debug.Log($"ContentManager: Set Texture blend mode");
 
-            _images.Add(texName, tex);
-            return tex;
-        }
+        //     _images.Add(texName, tex);
+        //     return tex;
+        // }
 
         /// <summary>
         /// Method to load SDL_Texture pointers to memroy and let ContentManager manage them
@@ -206,18 +218,21 @@ namespace Monte.Core
                 IntPtr texture = SDL_CreateTextureFromSurface(MonteEngine.SDL_Renderer, surface);
                 if (texture == IntPtr.Zero)
                     throw new Exception($"SDL_CreateTextureFromSurface failed: {SDL_GetError()}");
-            
 
-                Debug.Log($"ContentManager: {file} freeing surface");
-                SDL_FreeSurface(surface);
+                // Debug.Log($"ContentManager: {file} freeing surface");
+                // SDL_FreeSurface(surface);
 
                 if (SDL_SetTextureBlendMode(texture, RendererSettings.BlendMode) != 0)
                     Debug.Log(SDL_GetError());
 
                 _images[file] = texture;
+                _surfaceByFile[file] = surface;
             }
             return _images[file];
         }
+
+        public static IntPtr? GetTextureSurface(string file)
+            => _surfaceByFile.TryGetValue(file, out var surf) ? surf : null;
 
         /// <summary>
         /// Method to load SDL_Font pointers to memory and let content manager manage it
@@ -272,6 +287,14 @@ namespace Monte.Core
             Debug.Log("ContentManager: cleaning temp files");
             foreach (string tmp in _tempFiles)
                 File.Delete(tmp);
+
+            Debug.Log("ContentManager: Clearning up surfaces");
+            foreach (IntPtr ptr in _surfaceByFile.Values)
+                SDL_FreeSurface(ptr);
+
+            Debug.Log("ContentManager: Clearning up surfaces");
+            foreach (IntPtr ptr in _customTextures.Values)
+                SDL_FreeSurface(ptr);
         }
     }
 }
